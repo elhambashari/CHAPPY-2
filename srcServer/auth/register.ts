@@ -6,11 +6,13 @@ import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 
 const router = express.Router();
 
+
+
 // POST /api/auth/register
 router.post("/", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!username || !email || !password) {
+  if (!username|| !password) {
     return res.status(400).json({ error: "All fields are required." });
   }
 
@@ -36,7 +38,6 @@ router.post("/", async (req, res) => {
       pk: `USER#${username}`,
       sk: `PROFILE#${username}`,
       username,
-      email,
       password: hashedPassword,
     };
 
@@ -50,7 +51,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({
       message: "User registered successfully.",
-      user: { username, email },
+      user: { username },
     });
   } catch (error) {
     console.error("❌ Error registering user:", error);
