@@ -1,0 +1,97 @@
+
+.channels-container {
+  height: 100vh;
+  background: linear-gradient(to bottom, #b2e5f5, #5a9bb3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 250px;
+  margin-bottom: 1rem;
+}
+
+.header h2 {
+  font-size: 1.2rem;
+  color: #002b3d;
+}
+
+.logout-btn {
+  background-color: #ff4b4b;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #e03838;
+}
+
+.channels-section,
+.dm-section {
+  width: 250px;
+  background: linear-gradient(to bottom, #c0ecf9, #76b8d3);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.channel-item,
+.dm-item {
+  background-color: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.channel-item:hover,
+.dm-item:hover {
+  transform: scale(1.04);
+  background-color: #e9f9ff;
+}
+
+.dm-title {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+  color: #002b3d;
+  align-self: flex-start;
+  margin-left: calc(50% - 125px);
+  font-weight: bold;
+}
+
+.red-dot {
+  font-size: 0.9rem;
+}
+
+.yellow-dot {
+  font-size: 0.9rem;
+}
+
+.nyckel {
+  font-size: 0.9rem;
+}
+.locked {
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.locked:hover {
+  background: none;
+}
