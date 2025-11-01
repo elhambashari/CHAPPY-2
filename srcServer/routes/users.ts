@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    console.log("🔍 Fetching user profiles...");
+    console.log(" Fetching user profiles...");
 
     const command = new ScanCommand({
       TableName: "chappy",
