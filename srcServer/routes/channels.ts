@@ -5,15 +5,12 @@ import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 const router = express.Router();
 
-/**
- * 🟢 GET /api/channels
- * Fetch all channels (open and locked)
- */
+
 router.get("/", async (req, res) => {
   try {
     console.log("🔍 GET /api/channels called");
 
-    // Scan DynamoDB for channels
+    
     const command = new ScanCommand({
       TableName: "chappy",
       FilterExpression:
@@ -26,7 +23,7 @@ router.get("/", async (req, res) => {
 
     const result = await db.send(command);
 
-    // Keep only items that are channel metadata
+    
     const channels =
       result.Items?.filter((item) => item.sk.startsWith("META#")) || [];
 
