@@ -95,3 +95,43 @@
 .locked:hover {
   background: none;
 }
+
+
+.channel-item.locked {
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.empty-text {
+  text-align: center;
+  color: #aaa;
+  margin-top: 20px;
+  font-style: italic;
+}
+
+
+.channels-title {
+  font-size: 1.2rem; 
+  color: #02141b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  gap: 5px;
+}
+
+.status-dot {
+  font-size: 0.8rem; 
+  transform: translateY(1px);
+}
+
+.username {
+  font-size: 0.9rem; 
+  font-weight: 500;
+  color: #0b9c90; 
+}
