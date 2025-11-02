@@ -6,10 +6,7 @@ import { messageSchema } from "../validering/messageValidate.js";
 
 const router = express.Router();
 
-/**
- * GET /api/messages/:channel
- * Fetch all messages in a channel
- */
+
 router.get("/:channel", async (req, res) => {
   try {
     const { channel } = req.params;
@@ -32,10 +29,7 @@ router.get("/:channel", async (req, res) => {
   }
 });
 
-/**
- * POST /api/messages/:channel
- * Add a new message to a channel
- */
+
 router.post("/:channel", async (req, res) => {
   try {
     const { channel } = req.params;
@@ -65,7 +59,7 @@ router.post("/:channel", async (req, res) => {
       })
     );
 
-    console.log(`💬 Message added to channel ${channel}`);
+    console.log(` Message added to channel ${channel}`);
 
     res.status(201).json({
       message: "Message sent successfully.",
@@ -77,10 +71,7 @@ router.post("/:channel", async (req, res) => {
   }
 });
 
-/**
- * GET /api/messages/dm/:username
- * Get all DMs for a user
- */
+
 router.get("/dm/:username", async (req, res) => {
   try {
     const { username } = req.params;
