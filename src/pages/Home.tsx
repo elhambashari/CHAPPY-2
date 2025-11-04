@@ -1,5 +1,5 @@
 
-import  { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
 import "./Home.css";
@@ -10,9 +10,9 @@ const Home = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  
-  const { token, setUser, logout } = useUserStore();
+  const { setUser, setGuest } = useUserStore();
 
+  
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -28,16 +28,17 @@ const Home = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.token || "");
-        setUser(username, data.token || ""); 
-        navigate("/channels"); 
+        setUser(username, data.token || "");
+        navigate("/channels");
       } else {
         setError(data.error || "Registration failed.");
       }
-    } catch (err) {
+    } catch {
       setError("Server connection failed.");
     }
   };
 
+  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -53,14 +54,20 @@ const Home = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.token || "");
-        setUser(username, data.token || ""); 
+        setUser(username, data.token || "");
         navigate("/channels");
       } else {
         setError(data.error || "Incorrect username or password.");
       }
-    } catch (err) {
+    } catch {
       setError("Server connection failed.");
     }
+  };
+
+  
+  const handleGuest = () => {
+    setGuest(true); 
+    navigate("/channels");
   };
 
   return (
@@ -95,12 +102,11 @@ const Home = () => {
             Log in
           </button>
 
-        
           {error && <p className="error-text">{error}</p>}
         </form>
       </div>
 
-      <p className="guest-link" onClick={() => navigate("/guest")}>
+      <p className="guest-link" onClick={handleGuest}>
         continue as a guest
       </p>
     </div>
