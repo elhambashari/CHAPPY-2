@@ -1,16 +1,25 @@
 
 import express from "express";
+import type { Request, Response } from "express";
+
 import { db } from "../data/db.js";
 import { QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { messageSchema } from "../validering/messageValidate.js";
+import { verifyToken, requireAuth } from "../auth/authMiddleware.js";
 
 const router = express.Router();
 
-
-router.get("/:channel", async (req, res) => {
+/**
+ * GET /api/messages/:channel
+ */
+router.get("/:channel", verifyToken, async (req: Request, res: Response) => {
   try {
     const { channel } = req.params;
-    console.log(`💬 Fetching messages for channel: ${channel}`);
+    if (!channel) {
+      return res.status(400).json({ error: "Channel name is required." });
+    }
+
+    console.log(`📨 Fetching messages for channel: ${channel}`);
 
     const command = new QueryCommand({
       TableName: "chappy",
@@ -29,12 +38,17 @@ router.get("/:channel", async (req, res) => {
   }
 });
 
-
-router.post("/:channel", async (req, res) => {
+/**
+ * POST /api/messages/:channel
+ */
+router.post("/:channel", requireAuth, async (req: Request, res: Response) => {
   try {
     const { channel } = req.params;
-    const parsed = messageSchema.safeParse(req.body);
+    if (!channel) {
+      return res.status(400).json({ error: "Channel name is required." });
+    }
 
+    const parsed = messageSchema.safeParse(req.body);
     if (!parsed.success) {
       return res
         .status(400)
@@ -52,44 +66,95 @@ router.post("/:channel", async (req, res) => {
       createdAt: timestamp,
     };
 
-    await db.send(
-      new PutCommand({
-        TableName: "chappy",
-        Item: newMessage,
-      })
-    );
+    await db.send(new PutCommand({ TableName: "chappy", Item: newMessage }));
 
-    console.log(` Message added to channel ${channel}`);
-
-    res.status(201).json({
-      message: "Message sent successfully.",
-      item: newMessage,
-    });
+    console.log(`✅ Message added to channel ${channel}`);
+    res
+      .status(201)
+      .json({ message: "Message sent successfully.", item: newMessage });
   } catch (error) {
     console.error("❌ Error sending message:", error);
     res.status(500).json({ error: "Failed to send message." });
   }
 });
 
-
-router.get("/dm/:username", async (req, res) => {
+/**
+ * GET /api/messages/dm/:username
+ */
+router.get("/dm/:username", verifyToken, async (req: Request, res: Response) => {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
+    const user = String(req.query.user || "");
+
+    if (!username || !user) {
+      return res.status(400).json({ error: "Missing username or user parameter." });
+    }
+
+    const dmKey =
+      user.toLowerCase() < username.toLowerCase()
+        ? `DM#${user}#${username}`
+        : `DM#${username}#${user}`;
+
+    console.log(`💬 Fetching DMs for key: ${dmKey}`);
 
     const command = new QueryCommand({
       TableName: "chappy",
-      KeyConditionExpression: "pk = :pk AND begins_with(sk, :dmPrefix)",
+      KeyConditionExpression: "pk = :pk AND begins_with(sk, :msgPrefix)",
       ExpressionAttributeValues: {
-        ":pk": `USER#${username}`,
-        ":dmPrefix": "DM#",
+        ":pk": dmKey,
+        ":msgPrefix": "MESSAGE#",
       },
     });
 
     const result = await db.send(command);
-    res.json(result.Items || []);
+
+    const sorted =
+      result.Items?.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      ) || [];
+
+    res.json(sorted);
   } catch (error) {
     console.error("❌ Error fetching DMs:", error);
     res.status(500).json({ error: "Failed to fetch DMs." });
+  }
+});
+
+/**
+ * POST /api/messages/dm/:username
+ */
+router.post("/dm/:username", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const username = req.params.username as string;
+    const { sender, content } = req.body;
+
+    if (!username || !sender || !content) {
+      return res.status(400).json({ error: "Sender, username, and content are required." });
+    }
+
+    const timestamp = new Date().toISOString();
+
+    const dmKey =
+      sender.toLowerCase() < username.toLowerCase()
+        ? `DM#${sender}#${username}`
+        : `DM#${username}#${sender}`;
+
+    const newMessage = {
+      pk: dmKey,
+      sk: `MESSAGE#${timestamp}`,
+      sender,
+      content,
+      createdAt: timestamp,
+    };
+
+    await db.send(new PutCommand({ TableName: "chappy", Item: newMessage }));
+
+    console.log(`✅ DM sent from ${sender} to ${username}`);
+    res.status(201).json({ message: "DM sent successfully.", item: newMessage });
+  } catch (error) {
+    console.error("❌ Error sending DM:", error);
+    res.status(500).json({ error: "Failed to send DM." });
   }
 });
 
