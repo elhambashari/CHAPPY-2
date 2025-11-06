@@ -40,7 +40,8 @@ const frontendPath = path.resolve("./dist");
 app.use(express.static(frontendPath));
 
 
-app.get("/*", (req, res) => {
+app.get(/^\/(?!api).*/, (req, res) => {
+
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
