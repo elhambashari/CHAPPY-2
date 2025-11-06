@@ -4,29 +4,32 @@ import { useNavigate } from "react-router-dom";
 import { useUserStore } from "../store/userStore";
 import { useChannelStore } from "../store/channelStore";
 import { ToastContainer, toast } from "react-toastify";
+
+
 import "react-toastify/dist/ReactToastify.css";
 import "./Channels.css";
 
 const Channels = () => {
   const navigate = useNavigate();
-  const { username, token, isGuest, logout, hydrated } = useUserStore(); 
+  const { username, token, isGuest, logout, hydrated } = useUserStore();
   const { channels, setCurrentChannel } = useChannelStore();
-  const [users, setUsers] = useState<{ username: string }[]>([]);
 
-  
+  const [users, setUsers] = useState<{ username: string }[]>([]);
+  const [dms, setDMs] = useState<any[]>([]);
+
+  // Load users & DMs
   useEffect(() => {
-    if (!hydrated) return; 
-	
-console.log("🧩 token:", token, "isGuest:", isGuest);
+    if (!hydrated) return;
 
     if (!token && !isGuest) {
       navigate("/");
     } else {
       fetchUsers();
+      if (!isGuest) fetchDMs();
     }
-  }, [token, isGuest, hydrated, navigate]);
+  }, [token, isGuest, hydrated, navigate, username]);
 
-  // GET userslist
+  // Fetch all users
   const fetchUsers = async () => {
     try {
       const res = await fetch("/api/users");
@@ -42,14 +45,33 @@ console.log("🧩 token:", token, "isGuest:", isGuest);
     }
   };
 
-  
+  // Fetch direct messages (only for logged-in users)
+  const fetchDMs = async () => {
+    try {
+      const res = await fetch(`/api/users/${username}/dms`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setDMs(data);
+      } else {
+        console.warn("⚠️ Invalid DM data:", data);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching DMs:", error);
+      toast.error("Failed to load DMs.");
+    }
+  };
+
+  // Logout or exit guest mode
   const handleLogout = () => {
     logout();
     localStorage.removeItem("token");
     navigate("/");
   };
 
-  
+  // Handle clicking on a channel
   const handleChannelClick = (name: string, locked: boolean) => {
     if (isGuest && locked) {
       toast.warning("🔒 This channel is locked for guests!", {
@@ -64,10 +86,14 @@ console.log("🧩 token:", token, "isGuest:", isGuest);
     navigate(`/chat/${name.replace("#", "")}`);
   };
 
-  // DM click
+  // Handle clicking on a direct message
   const handleDmClick = (userName: string) => {
     if (isGuest) {
-      toast.info("Guests cannot send private messages.");
+      toast.info("Guests cannot send private messages.", {
+        position: "bottom-center",
+        autoClose: 3000,
+        theme: "dark",
+      });
       return;
     }
 
@@ -78,7 +104,7 @@ console.log("🧩 token:", token, "isGuest:", isGuest);
   return (
     <div className="channels-wrapper">
       <div className="channels-box">
-      
+        {/* Header */}
         <div className="header">
           <h2 className="channels-title">
             {isGuest ? (
@@ -97,7 +123,7 @@ console.log("🧩 token:", token, "isGuest:", isGuest);
           </button>
         </div>
 
-       
+        {/* Channels section */}
         <div className="section">
           <h3>Channels</h3>
           <div className="list">
@@ -114,38 +140,62 @@ console.log("🧩 token:", token, "isGuest:", isGuest);
           </div>
         </div>
 
-        {/* login user*/}
+        {/* Direct Messages - only for logged-in users */}
         {!isGuest && (
-          <>
-            <div className="section">
-              <h3>Direct Messages</h3>
-              <div className="list">
-                <div className="item" onClick={() => handleDmClick("MalahatMo")}>
-                  Mahalat Mo <span className="red-dot"></span>
-                </div>
-                <div className="item" onClick={() => handleDmClick("PariaTaba")}>
-                  Paria Taba
-                </div>
-              </div>
-            </div>
-
-            <div className="section">
-              <h3>All Users</h3>
-              <div className="list">
-                {users.map((user) => (
+          <div className="section">
+            <h3>Direct Messages</h3>
+            <div className="list">
+              {dms.length === 0 ? (
+                <p className="empty-text">No DMs yet</p>
+              ) : (
+                dms.map((dm, index) => (
                   <div
-                    key={user.username}
-                    className="item user"
-                    onClick={() => handleDmClick(user.username)}
+                    key={index}
+                    className="item"
+                    onClick={() => handleDmClick(dm.username)}
                   >
-                    {user.username}
-                    <span className="status-dot">🟢</span>
+                    {dm.username || "Unknown"}
                   </div>
-                ))}
-              </div>
+                ))
+              )}
             </div>
-          </>
+          </div>
         )}
+
+        {/* All Users - visible for both guests and logged-in users */}
+        <div className="section">
+          <h3>All Users</h3>
+          <div className="list">
+            {users.map((user) => (
+              <div
+                key={user.username}
+                className={`item user ${isGuest ? "disabled" : ""}`}
+                onClick={() => {
+                  if (isGuest) {
+                    toast.info("Guests cannot start private chats.", {
+                      position: "bottom-center",
+                      autoClose: 3000,
+                      theme: "dark",
+                    });
+                    return;
+                  }
+                  handleDmClick(user.username);
+                }}
+              >
+                {user.username}
+                <span className="status-dot">🟢</span>
+              </div>
+            ))}
+          </div>
+
+
+          {/* Guest warning message */}
+          {isGuest && (
+            <p className="guest-warning">
+              ⚠️ Guests can view users but cannot send messages.
+            </p>
+          )}
+        </div>
       </div>
 
       <ToastContainer position="bottom-center" autoClose={3000} theme="colored" />

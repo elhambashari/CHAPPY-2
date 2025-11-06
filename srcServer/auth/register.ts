@@ -1,18 +1,17 @@
 
 import express from "express";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { db } from "../data/db.js";
 import { PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 
 const router = express.Router();
 
-
-
 // POST /api/auth/register
 router.post("/", async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username|| !password) {
+  if (!username || !password) {
     return res.status(400).json({ error: "All fields are required." });
   }
 
@@ -25,6 +24,7 @@ router.post("/", async (req, res) => {
         sk: `PROFILE#${username}`,
       },
     });
+
     const existing = await db.send(checkCommand);
     if (existing.Item) {
       return res.status(400).json({ error: "Username already exists." });
@@ -41,17 +41,27 @@ router.post("/", async (req, res) => {
       password: hashedPassword,
     };
 
+    // Save to DynamoDB
     const command = new PutCommand({
       TableName: "chappy",
       Item: newUser,
     });
 
     await db.send(command);
+
+    
+	
+    const token = jwt.sign({ username }, process.env.JWT_SECRET || "supersecretkey", {
+      expiresIn: "2h",
+    });
+
     console.log("✅ User registered:", username);
 
+    
     res.status(201).json({
       message: "User registered successfully.",
       user: { username },
+      token,
     });
   } catch (error) {
     console.error("❌ Error registering user:", error);
