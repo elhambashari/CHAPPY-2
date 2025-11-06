@@ -1,6 +1,8 @@
 
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import users from "./routes/users.js";
 import channels from "./routes/channels.js";
@@ -8,20 +10,20 @@ import messages from "./routes/messages.js";
 import login from "./auth/login.js";
 import register from "./auth/register.js";
 
-
-
-
-
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
 
-
 app.use((req, res, next) => {
-  console.log(` ${req.method} ${req.url}`);
+  console.log(`📡 ${req.method} ${req.url}`);
   next();
 });
 
@@ -33,10 +35,16 @@ app.use("/api/auth/login", login);
 app.use("/api/auth/register", register);
 
 
-console.log("🔄 Server starting...");
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+const frontendPath = path.join(__dirname, "../dist");
+app.use(express.static(frontendPath));
+
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 
-
+console.log("🚀 Server starting...");
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
