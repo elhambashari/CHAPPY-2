@@ -4,12 +4,14 @@ import { db } from "../data/db.js";
 import { ScanCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { verifyToken } from "../auth/authMiddleware.js"; 
 
+
+
 const router = express.Router();
 
 // ✅ GET /api/users
 router.get("/", verifyToken, async (req, res) => {
   try {
-    console.log("📡 Fetching all users from DynamoDB...");
+    console.log(" Fetching all users from DynamoDB...");
 
     const command = new ScanCommand({
       TableName: "chappy",
@@ -59,7 +61,7 @@ router.get("/:username", verifyToken, async (req, res) => {
 router.get("/:username/dms", verifyToken, async (req, res) => {
   try {
     const { username } = req.params;
-    console.log(`💬 Fetching DMs for user: ${username}`);
+    console.log(` Fetching DMs for user: ${username}`);
 
     const command = new ScanCommand({
       TableName: "chappy",

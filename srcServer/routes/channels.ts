@@ -4,6 +4,8 @@ import { db } from "../data/db.js";
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { verifyToken } from "../auth/authMiddleware.js"; 
 
+
+
 const router = express.Router();
 
 // GET /api/channels
