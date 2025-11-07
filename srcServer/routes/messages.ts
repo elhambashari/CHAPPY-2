@@ -19,7 +19,7 @@ router.get("/:channel", verifyToken, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Channel name is required." });
     }
 
-    console.log(`📨 Fetching messages for channel: ${channel}`);
+   
 
     const command = new QueryCommand({
       TableName: "chappy",
@@ -38,21 +38,26 @@ router.get("/:channel", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-/**
- * POST /api/messages/:channel
- */
-router.post("/:channel", requireAuth, async (req: Request, res: Response) => {
+router.post("/:channel", verifyToken, async (req: Request, res: Response) => {
   try {
     const { channel } = req.params;
     if (!channel) {
       return res.status(400).json({ error: "Channel name is required." });
     }
 
+    
+    const user = (req as any).user; 
+    const isGuest = !user; 
+
+    
+    if (isGuest && channel !== "code" && channel !== "random") {
+      return res.status(403).json({ error: "Guests can only post in #code and #random." });
+    }
+
+    
     const parsed = messageSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res
-        .status(400)
-        .json({ error: parsed.error.issues.map((e) => e.message) });
+      return res.status(400).json({ error: parsed.error.issues.map((e) => e.message) });
     }
 
     const { sender, content } = parsed.data;
@@ -69,14 +74,13 @@ router.post("/:channel", requireAuth, async (req: Request, res: Response) => {
     await db.send(new PutCommand({ TableName: "chappy", Item: newMessage }));
 
     console.log(`✅ Message added to channel ${channel}`);
-    res
-      .status(201)
-      .json({ message: "Message sent successfully.", item: newMessage });
+    res.status(201).json({ message: "Message sent successfully.", item: newMessage });
   } catch (error) {
     console.error("❌ Error sending message:", error);
     res.status(500).json({ error: "Failed to send message." });
   }
 });
+
 
 /**
  * GET /api/messages/dm/:username
@@ -95,7 +99,7 @@ router.get("/dm/:username", verifyToken, async (req: Request, res: Response) => 
         ? `DM#${user}#${username}`
         : `DM#${username}#${user}`;
 
-    console.log(`💬 Fetching DMs for key: ${dmKey}`);
+  
 
     const command = new QueryCommand({
       TableName: "chappy",

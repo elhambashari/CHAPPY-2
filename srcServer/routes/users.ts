@@ -8,7 +8,7 @@ import { verifyToken } from "../auth/authMiddleware.js";
 
 const router = express.Router();
 
-// ✅ GET /api/users
+//  GET /api/users
 router.get("/", verifyToken, async (req, res) => {
   try {
     console.log(" Fetching all users from DynamoDB...");
@@ -34,7 +34,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ GET /api/users/:username
+//  GET /api/users/:username
 router.get("/:username", verifyToken, async (req, res) => {
   const { username } = req.params;
   try {
@@ -57,7 +57,7 @@ router.get("/:username", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ GET /api/users/:username/dms
+// GET /api/users/:username/dms
 router.get("/:username/dms", verifyToken, async (req, res) => {
   try {
     const { username } = req.params;

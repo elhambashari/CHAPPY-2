@@ -11,7 +11,7 @@ const router = express.Router();
 // GET /api/channels
 router.get("/", verifyToken, async (req, res) => {
   try {
-    console.log("🔍 GET /api/channels called");
+  
 
     const command = new ScanCommand({
       TableName: "chappy",
@@ -27,7 +27,6 @@ router.get("/", verifyToken, async (req, res) => {
     const channels =
       result.Items?.filter((item) => item.sk.startsWith("META#")) || [];
 
-    console.log(`✅ Channels fetched: ${channels.length}`);
 
     
     res.json({
