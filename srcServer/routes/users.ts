@@ -23,7 +23,6 @@ router.get("/", verifyToken, async (req, res) => {
     const result = await db.send(command);
     const users = (result.Items || []).map((item) => ({
       username: item.username,
-      email: item.email || null,
     }));
 
     console.log(`✅ Found ${users.length} users.`);
@@ -49,7 +48,6 @@ router.get("/:username", verifyToken, async (req, res) => {
 
     res.json({
       username: result.Item.username,
-      email: result.Item.email || null,
     });
   } catch (error) {
     console.error("❌ Error fetching user:", error);
