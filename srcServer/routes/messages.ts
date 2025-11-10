@@ -31,6 +31,18 @@ router.get("/:channel", verifyToken, async (req: Request, res: Response) => {
     });
 
     const result = await db.send(command);
+
+
+
+	const sorted =
+  result.Items?.sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  ) || [];
+
+res.json(sorted);
+
+
+
     res.json(result.Items || []);
   } catch (error) {
     console.error("❌ Error fetching messages:", error);
