@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { fileURLToPath } from "url";
+
 
 import users from "./routes/users.js";
 import channels from "./routes/channels.js";
