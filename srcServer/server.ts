@@ -14,8 +14,6 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 app.use(cors());
 app.use(express.json());
@@ -40,10 +38,6 @@ const frontendPath = path.resolve("./dist");
 app.use(express.static(frontendPath));
 
 
-app.get(/^\/(?!api).*/, (req, res) => {
-
-  res.sendFile(path.join(frontendPath, "index.html"));
-});
 
 
 console.log(" Server starting...");
