@@ -1,0 +1,42 @@
+
+Länk till publikt GitHub-repo:
+https://github.com/elhambashari/CHAPPY-2.git
+
+
+
+README.md:
+Finns i projektets rotmapp. Den beskriver applikationen, funktioner och tekniker som används.
+
+
+package.json:
+  "scripts": {
+    "dev": "vite",
+    "build-frontend": "tsc -b && vite build",
+    "build-server": "tsc -p ./srcServer/tsconfig.json",
+    "start-server": "node --env-file ./.env  ./distServer/server.js",
+    "restart-server": "clear && npm run build-server && npm run start-server",
+    "predeploy": "npm run build-frontend && npm run build-server"
+  },
+Innehåller alla nödvändiga skript för att köra projektet.
+Läraren kan köra projektet genom att skriva:
+git clone https://github.com/elhambashari/CHAPPY-2.git
+cd chappy-2
+npm install
+npm run restart-server
+
+
+
+
+.env-fil:
+
+AWS_ACCESS_KEY_ID=hämligt
+AWS_SECRET_ACCESS_KEY=hämligt
+AWS_REGION=eu-north-1
+port=10000
+JWT_SECRET=hämligt
+
+
+
+
+Publicerad webbserver:
+https://chappy-2-2.onrender.com/
